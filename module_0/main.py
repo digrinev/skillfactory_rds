@@ -47,11 +47,14 @@ def game_core_v3(number):
     while number != predict:
         count += 1
         if number < predict:
+            # Ограничиваем верхнее значение генератора
             max_value = predict
             predict = np.random.randint(min_value, max_value)
         elif number > predict:
+            # Ограничиваем нижнее значение генератора
             min_value = predict
             predict = np.random.randint(min_value, max_value)
+    # Возвращаем число попыток
     return count
 
 
