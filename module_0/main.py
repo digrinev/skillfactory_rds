@@ -42,20 +42,21 @@ def game_core_v3(number):
     """Сначала устанавливаем любое random число, а потом генерируем новое в зависимости от того, больше оно или меньше нужного.
         При этом на каждом шаге генерации числа меняем аргументы функции генератора, сокращая диапазон значений функции.
        Функция принимает загаданное число и возвращает число попыток"""
-    count, min_value, max_value = 0, 1, 101
-    predict = np.random.randint(min_value, max_value)
+    tries_count, rand_min, rand_max = 0, 1, 101
+    # Первая попытка - середина диапазона
+    predict = 50
     while number != predict:
-        count += 1
+        tries_count += 1
         if number < predict:
             # Ограничиваем верхнее значение генератора
-            max_value = predict
-            predict = np.random.randint(min_value, max_value)
+            rand_max = predict
+            predict = np.random.randint(rand_min, rand_max)
         elif number > predict:
             # Ограничиваем нижнее значение генератора
-            min_value = predict
-            predict = np.random.randint(min_value, max_value)
+            rand_min = predict
+            predict = np.random.randint(rand_min, rand_max)
     # Возвращаем число попыток
-    return count
+    return tries_count
 
 
 # запускаем
