@@ -10,6 +10,10 @@ class GameCore:
     number_max: int = 101
     experiment_count: int = 1000  # количество запусков игры
     __tries_count = 0  # счетчик попыток
+    algorithm = {}  # по какому алгоритму запускать игру
+
+    def __post_init__(self):
+        self.__init_algorithm()  # инициализируем словарь алгоритмов
 
     def game_core_v1(self, number) -> int:
         """Просто угадываем на random, никак не используя информацию о больше или меньше.
@@ -75,7 +79,17 @@ class GameCore:
         # Возвращаем число попыток
         return self.__tries_count
 
+    def __init_algorithm(self):
+        self.algorithm = {1: self.game_core_v1, 2: self.game_core_v2, 3: self.game_core_v3}
+
+    def start_game(self, algorithm_version=3):
+        try:
+            self.score_game(self.algorithm[algorithm_version])
+        except KeyError:
+            print('Нет такого алгоритма!')
+            exit()
+
 
 # запускаем
 new_game = GameCore()
-new_game.score_game(new_game.game_core_v3)
+new_game.start_game()
