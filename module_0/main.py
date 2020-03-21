@@ -19,23 +19,31 @@ class GameCore:
         """Просто угадываем на random, никак не используя информацию о больше или меньше.
            Функция принимает загаданное число и возвращает число попыток"""
         self.__tries_count = 0
-        while True:
-            self.__tries_count += 1
-            predict = np.random.randint(self.number_min, self.number_max)  # предполагаемое число
-            if number == predict:
-                return self.__tries_count  # выход из цикла, если угадали
+        try:
+            while True:
+                self.__tries_count += 1
+                predict = np.random.randint(self.number_min, self.number_max)  # предполагаемое число
+                if number == predict:
+                    return self.__tries_count  # выход из цикла, если угадали
+        except ValueError:
+            print(self.ERROR_LABEL)
+            exit()
 
     def game_core_v2(self, number) -> int:
         """Сначала устанавливаем любое random число, а потом уменьшаем или увеличиваем его в зависимости от того, больше оно или меньше нужного.
            Функция принимает загаданное число и возвращает число попыток"""
         self.__tries_count = 0
-        predict = np.random.randint(self.number_min, self.number_max)
-        while number != predict:
-            self.__tries_count += 1
-            if number > predict:
-                predict += 1
-            elif number < predict:
-                predict -= 1
+        try:
+            predict = np.random.randint(self.number_min, self.number_max)
+            while number != predict:
+                self.__tries_count += 1
+                if number > predict:
+                    predict += 1
+                elif number < predict:
+                    predict -= 1
+        except ValueError:
+            print(self.ERROR_LABEL)
+            exit()
         return self.__tries_count  # выход из цикла, если угадали
 
     def score_game(self, game_core) -> int:
@@ -92,4 +100,4 @@ class GameCore:
 
 # запускаем
 new_game = GameCore()
-new_game.start_game()
+new_game.start_game()  # по умолчанию 3 алгоритм
