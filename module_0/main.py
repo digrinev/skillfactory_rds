@@ -93,7 +93,7 @@ class GameCore:
     def start_game(self, algorithm_version=3):
         try:
             self.score_game(self.algorithm[algorithm_version])
-        except KeyError:
+        except (KeyError, TypeError):
             print('Нет такого алгоритма!')
             exit()
 
@@ -101,3 +101,4 @@ class GameCore:
 # запускаем
 new_game = GameCore()
 new_game.start_game()  # по умолчанию 3 алгоритм
+
