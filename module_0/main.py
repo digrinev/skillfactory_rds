@@ -66,20 +66,52 @@ class GameCore:
         """Сначала устанавливаем число из середины диапазона, а потом генерируем новое в зависимости от того, больше оно или меньше нужного.
             При этом на каждом шаге генерации числа меняем аргументы функции генератора, сокращая диапазон значений функции.
            Функция принимает загаданное число и возвращает число попыток"""
-        self.__tries_count, rand_min, rand_max = 0, self.number_min, self.number_max
+        self.__tries_count, rand_min, rand_max = 1, self.number_min, self.number_max
         # Первая попытка - середина диапазона
-        predict = int(self.number_min + self.number_max) / 2
+        predict = int(self.number_max)//2
+
         try:
             while number != predict:
-                self.__tries_count += 1
                 if number < predict:
                     # Ограничиваем верхнее значение генератора
                     rand_max = predict
                     predict = np.random.randint(rand_min, rand_max)
                 elif number > predict:
                     # Ограничиваем нижнее значение генератора
-                    rand_min = predict
+                    rand_min = predict+1
                     predict = np.random.randint(rand_min, rand_max)
+                self.__tries_count += 1
+
+        except ValueError:
+            print(self.ERROR_LABEL)
+            exit()
+
+        # Возвращаем число попыток
+        return self.__tries_count
+
+    def game_core_v4(self, number) -> int:
+        """Сначала устанавливаем число из середины диапазона, а потом угадываем методом деления отрезка пополам.
+            При этом на каждом шаге угадывания числа делим диапазон значений пополам.
+           Функция принимает загаданное число и возвращает число попыток"""
+
+        # Первая попытка - середина диапазона
+        predict = int(self.number_max)//2
+        high = self.number_max
+        low = self.number_min
+        self.__tries_count = 1
+
+        try:
+            while number != predict:
+                self.__tries_count += 1
+                # Задаем число из середины текущего диапазона
+                predict = int(low+high)//2
+                if number < predict:
+                    # Ограничиваем верхнее значение диапазона
+                    high = predict
+                elif number > predict:
+                    # Ограничиваем нижнее значение диапазона
+                    low = predict + 1
+
         except ValueError:
             print(self.ERROR_LABEL)
             exit()
@@ -88,9 +120,9 @@ class GameCore:
         return self.__tries_count
 
     def __init_algorithm(self):
-        self.algorithm = {1: self.game_core_v1, 2: self.game_core_v2, 3: self.game_core_v3}
+        self.algorithm = {1: self.game_core_v1, 2: self.game_core_v2, 3: self.game_core_v3, 4: self.game_core_v4}
 
-    def start_game(self, algorithm_version=3):
+    def start_game(self, algorithm_version=4):
         try:
             self.score_game(self.algorithm[algorithm_version])
         except (KeyError, TypeError):
@@ -100,5 +132,5 @@ class GameCore:
 
 # запускаем
 new_game = GameCore()
-new_game.start_game()  # по умолчанию 3 алгоритм
+new_game.start_game()  # по умолчанию 4 алгоритм
 
