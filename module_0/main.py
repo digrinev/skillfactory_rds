@@ -91,18 +91,14 @@ class GameCore:
 
     def game_core_v4(self, number) -> int:
         """Сначала устанавливаем число из середины диапазона, а потом угадываем методом деления отрезка пополам.
-            При этом на каждом шаге угадывания числа делим диапазон значений пополам.
            Функция принимает загаданное число и возвращает число попыток"""
+        low, high, self.__tries_count = self.number_min, self.number_max, 1
 
         # Первая попытка - середина диапазона
         predict = int(self.number_max)//2
-        high = self.number_max
-        low = self.number_min
-        self.__tries_count = 1
 
         try:
             while number != predict:
-                self.__tries_count += 1
                 # Задаем число из середины текущего диапазона
                 predict = int(low+high)//2
                 if number < predict:
@@ -111,6 +107,7 @@ class GameCore:
                 elif number > predict:
                     # Ограничиваем нижнее значение диапазона
                     low = predict + 1
+                self.__tries_count += 1
 
         except ValueError:
             print(self.ERROR_LABEL)
