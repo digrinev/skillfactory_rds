@@ -100,13 +100,13 @@ class GameCore:
         try:
             while number != predict:
                 # Задаем число из середины текущего диапазона
-                predict = int(low+high)//2
                 if number < predict:
                     # Ограничиваем верхнее значение диапазона
                     high = predict
                 elif number > predict:
                     # Ограничиваем нижнее значение диапазона
                     low = predict + 1
+                predict = int(low + high) // 2
                 self.__tries_count += 1
 
         except ValueError:
