@@ -52,10 +52,16 @@ class GameCore:
         try:
             np.random.seed(1)  # фиксируем RANDOM SEED, чтобы ваш эксперимент был воспроизводим!
             random_array = np.random.randint(self.number_min, self.number_max, size=self.experiment_count)
+
+            from collections import Counter
+            from statistics import mean
+
             for number in random_array:
                 count_ls.append(game_core(number))
-                score = int(np.mean(count_ls))
+                score = int(round(np.median(count_ls)))
+
             print(f"Ваш алгоритм угадывает число в среднем за {score} попыток")
+
         except ValueError:
             print(self.ERROR_LABEL)
             exit()
@@ -75,11 +81,10 @@ class GameCore:
                 if number < predict:
                     # Ограничиваем верхнее значение генератора
                     rand_max = predict
-                    predict = np.random.randint(rand_min, rand_max)
                 elif number > predict:
                     # Ограничиваем нижнее значение генератора
-                    rand_min = predict+1
-                    predict = np.random.randint(rand_min, rand_max)
+                    rand_min = predict
+                predict = np.random.randint(rand_min, rand_max)
                 self.__tries_count += 1
 
         except ValueError:
