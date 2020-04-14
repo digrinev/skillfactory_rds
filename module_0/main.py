@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from time import perf_counter
 
 import numpy as np
 
@@ -48,6 +49,7 @@ class GameCore:
 
     def score_game(self, game_core) -> int:
         """Запускаем игру n-раз, чтобы узнать, как быстро игра угадывает число"""
+        t1 = perf_counter()
         count_ls = []
         try:
             np.random.seed(1)  # фиксируем RANDOM SEED, чтобы ваш эксперимент был воспроизводим!
@@ -59,8 +61,31 @@ class GameCore:
         except ValueError:
             print(self.ERROR_LABEL)
             exit()
-
+        t2 = perf_counter()
+        print(f'Время выполнения score_game: {t2-t1}')
         return score
+
+    def score_game_vectorize(self, game_core) -> int:
+        """Векторезированная версия. Запускаем игру n-раз, чтобы узнать, как быстро игра угадывает число"""
+        t1 = perf_counter()
+        count_ls = np.zeros(self.experiment_count, dtype=int)
+        try:
+            np.random.seed(1)  # фиксируем RANDOM SEED, чтобы ваш эксперимент был воспроизводим!
+            random_array = np.random.randint(self.number_min, self.number_max, size=self.experiment_count, dtype=int)
+
+            def f(x):
+                return game_core(x)
+
+            f_vector = np.vectorize(f)
+            count_ls += f_vector(random_array)
+            score = int(round(np.median(count_ls)))
+            print(f"Ваш алгоритм угадывает число в среднем за {score} попыток")
+        except ValueError:
+            print(self.ERROR_LABEL)
+            exit()
+        t2 = perf_counter()
+        print(f'Время выполнения score_game: {t2-t1}')
+        return count_ls
 
     def game_core_v3(self, number) -> int:
         """Сначала устанавливаем число из середины диапазона, а потом генерируем новое в зависимости от того, больше оно или меньше нужного.
@@ -68,7 +93,7 @@ class GameCore:
            Функция принимает загаданное число и возвращает число попыток"""
         self.__tries_count, rand_min, rand_max = 1, self.number_min, self.number_max
         # Первая попытка - середина диапазона
-        predict = int(self.number_max)//2
+        predict = int(self.number_max) // 2
 
         try:
             while number != predict:
@@ -78,7 +103,7 @@ class GameCore:
                     predict = np.random.randint(rand_min, rand_max)
                 elif number > predict:
                     # Ограничиваем нижнее значение генератора
-                    rand_min = predict+1
+                    rand_min = predict + 1
                     predict = np.random.randint(rand_min, rand_max)
                 self.__tries_count += 1
 
@@ -95,7 +120,7 @@ class GameCore:
         low, high, self.__tries_count = self.number_min, self.number_max, 1
 
         # Первая попытка - середина диапазона
-        predict = int(self.number_max)//2
+        predict = int(self.number_max) // 2
 
         try:
             while number != predict:
@@ -119,15 +144,18 @@ class GameCore:
     def __init_algorithm(self):
         self.algorithm = {1: self.game_core_v1, 2: self.game_core_v2, 3: self.game_core_v3, 4: self.game_core_v4}
 
-    def start_game(self, algorithm_version=4):
+    def start_game(self, algorithm_version=4, score_type=2):
         try:
-            self.score_game(self.algorithm[algorithm_version])
-        except (KeyError, TypeError):
-            print('Нет такого алгоритма!')
+            if score_type != 2:
+                self.score_game(self.algorithm[algorithm_version])
+            else:
+                self.score_game_vectorize(self.algorithm[algorithm_version])
+
+        except (KeyError, TypeError) as e:
+            print(f'Ошибка! {e}')
             exit()
 
 
 # запускаем
 new_game = GameCore()
-new_game.start_game()  # по умолчанию 4 алгоритм
-
+new_game.start_game()  # по умолчанию 4 алгоритм и score_game_vectorized
