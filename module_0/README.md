@@ -9,7 +9,7 @@ GameCore class has 4 methods with different guess number algorithm implementatio
 <p>
 </p>
 <b>score_game(gamecore)</b> - run chosen game_core n-times in for loop. Return mean of guess a number tries.
-<b>score_game_vectorize(gamecore)</b> - run chosen game_core n-times in matrix style. Reaturn meadian of guess a number tries.
+<b>score_game_vectorize(gamecore)</b> - run chosen game_core n-times in matrix style. Return median of guess a number tries.
 <br>
 <b>start_game(game_core_version=4, score_game_version=2)</b> - run chosen score_game(gamecore).
  <h2>Example</h2>
