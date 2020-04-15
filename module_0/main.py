@@ -62,7 +62,7 @@ class GameCore:
             print(self.ERROR_LABEL)
             exit()
         t2 = perf_counter()
-        print(f'Время выполнения score_game: {t2-t1}')
+        print(f'Время выполнения score_game: {t2 - t1}')
         return score
 
     def score_game_vectorize(self, game_core) -> int:
@@ -84,7 +84,7 @@ class GameCore:
             print(self.ERROR_LABEL)
             exit()
         t2 = perf_counter()
-        print(f'Время выполнения score_game: {t2-t1}')
+        print(f'Время выполнения score_game: {t2 - t1}')
         return count_ls
 
     def game_core_v3(self, number) -> int:
@@ -154,8 +154,3 @@ class GameCore:
         except (KeyError, TypeError) as e:
             print(f'Ошибка! {e}')
             exit()
-
-
-# запускаем
-new_game = GameCore()
-new_game.start_game()  # по умолчанию 4 алгоритм и score_game_vectorized
