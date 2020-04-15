@@ -1,11 +1,11 @@
 <h1>module_0 - Guess a number</h1>
 
 <h3>Guess a number game</h3>
-GameCore class has 4 methods with different guess number algorithm implementations.
-1. game_core_v1 - random.randint based algorithm. Just a random guess.
-2. game_core_v2 - this algorithm uses predicted number conditions: is predicted number greater or lower than guessed one?
-3. game_core_v3 - binary search algorithm bases on random.randint
-4. game_core_v4 - binary search algorithm without any random
+GameCore class has 4 methods with different guess number algorithm implementations.<br>
+1. game_core_v1 - random.randint based algorithm. Just a random guess.<br>
+2. game_core_v2 - this algorithm uses predicted number conditions: is predicted number greater or lower than guessed one?<br>
+3. game_core_v3 - binary search algorithm bases on random.randint<br>
+4. game_core_v4 - binary search algorithm without any random<br>
 <p>
 </p>
 <b>score_game(gamecore)</b> - run chosen game_core n-times in for loop. Return mean of guess a number tries.
