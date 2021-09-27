@@ -1,0 +1,51 @@
+FROM tensorflow/tensorflow:latest-gpu-jupyter
+
+RUN apt update
+
+RUN apt-get install -y protobuf-compiler python-pil python-lxml
+
+RUN apt-get install -y wget
+
+RUN mkdir -p /tensorflow/models
+
+RUN git clone https://github.com/tensorflow/models.git /tensorflow/models
+
+WORKDIR /tensorflow/models/research
+
+RUN protoc object_detection/protos/*.proto --python_out=.
+
+RUN cp object_detection/packages/tf2/setup.py .
+RUN python -m pip install .
+
+RUN export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+
+RUN pip install jupyter_contrib_nbextensions
+RUN pip install nbformat -U
+
+RUN apt install libgtk2.0-dev pkg-config -y
+RUN apt-get install ffmpeg libsm6 libxext6 libxrender-dev -y
+
+RUN pip install imageio
+RUN pip install google-colab
+
+RUN pip install pydot
+RUN pip install pydotplus
+RUN apt-get install graphviz -y
+
+RUN pip install --upgrade ipykernel
+
+ENV TERM=xterm
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN pip uninstall opencv-python -y
+RUN pip install opencv-python
+
+RUN jupyter contrib nbextension install --user
+RUN jupyter notebook --generate-config --allow-root
+RUN echo "c.NotebookApp.password = u'sha1:6a3f528eec40:6e896b6e4828f525a6e20e5411cd1c8075d68619'" >> /root/.jupyter/jupyter_notebook_config.py
+
+EXPOSE 8888
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["jupyter", "notebook", "--allow-root", "--notebook-dir=/app/", "--ip=0.0.0.0", "--port=8888", "--no-browser"]
