@@ -15,7 +15,7 @@ def main():
     face_aligner = FaceAligner()
 
     # ResNet50 Backbone
-    detector = RetinaFace(gpu_id=0, model_path='/home/user/skillfactory_rds/Detector/models/Resnet50_Final.pth', network='resnet50')
+    detector = RetinaFace(gpu_id=0, model_path='/home/user/skillfactory_rds/FinalProject/models/Resnet50_Final.pth', network='resnet50')
 
     cam = cv2.VideoCapture(0)
 
