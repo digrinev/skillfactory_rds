@@ -1,11 +1,14 @@
+from threading import current_thread
 import numpy as np
 import cv2
+from face_detection import RetinaFace
+
 
 class FaceAligner:
     """ Modified from https://github.com/PyImageSearch/imutils/blob/master/imutils/face_utils/facealigner.py
     """
     def __init__(self, desiredLeftEye=(0.35, 0.35),
-        desiredFaceWidth=256, desiredFaceHeight=None):
+        desiredFaceWidth=112, desiredFaceHeight=None):
         # store the facial landmark predictor, desired output left
         # eye position, and desired output face width + height
         self.desiredLeftEye = desiredLeftEye
@@ -64,3 +67,33 @@ class FaceAligner:
 
         # return the aligned face
         return output
+
+
+class FaceDetector:
+
+    def __init__(self) -> None:
+        self.nms_threshold = 0.4
+        self.face_aligner = FaceAligner()
+        self.detector = RetinaFace(gpu_id=0, model_path='/home/user/skillfactory_rds/FinalProject/models/Resnet50_Final.pth', network='resnet50')
+
+
+    def detect(self, img):
+        faces = self.detector([img])
+
+        found_faces = {'boxes': [], 'landmarks': []}
+
+        # box, landmarks, score = faces[0]
+        for face in faces[0]:
+            box, landmarks, score = face
+
+            left_eye = tuple(map(int, landmarks[0]))
+            right_eye = tuple(map(int, landmarks[1]))
+
+            box = box.astype(np.int)
+
+            if score > self.nms_threshold:
+                found_faces['boxes'].append(box)
+                found_faces['landmarks'].append(landmarks)
+        
+        return found_faces['boxes'], found_faces['landmarks']
+     
