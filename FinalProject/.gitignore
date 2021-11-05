@@ -14,9 +14,6 @@ __pycache__/
 *.csv
 *.json
 
-*.jpg
-*.jpeg
-
 # Distribution / packaging
 .Python
 build/
