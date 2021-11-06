@@ -74,7 +74,7 @@ class FaceDetector:
     def __init__(self) -> None:
         self.nms_threshold = 0.4
         self.face_aligner = FaceAligner()
-        self.detector = RetinaFace(gpu_id=0, model_path='/home/user/skillfactory_rds/FinalProject/models/Resnet50_Final.pth', network='resnet50')
+        self.detector = RetinaFace(gpu_id=-1, model_path='/home/user/skillfactory_rds/FinalProject/models/Resnet50_Final.pth', network='resnet50')
 
 
     def detect(self, img):
