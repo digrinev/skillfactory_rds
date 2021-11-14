@@ -155,3 +155,5 @@ cython_debug/
 
 *.jpg
 *.jpeg
+*.pkl
+*.index

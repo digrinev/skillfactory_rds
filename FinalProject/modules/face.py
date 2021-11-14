@@ -5,7 +5,11 @@ from face_detection import RetinaFace
 from skimage import transform
 from sklearn.preprocessing import normalize
 from skimage.color import gray2rgb, rgba2rgb
+from io import BytesIO
+from PIL import Image
 
+# Максимальная ширина изображения (RetinaFace)
+FIXED_WIDTH = 640
 
 class FaceAligner:
     """ Modified from https://github.com/PyImageSearch/imutils/blob/master/imutils/face_utils/facealigner.py
@@ -123,6 +127,15 @@ def do_detect_in_image(image, det, image_format="BGR"):
 
 
 def prepare_image(img, det):
+    # Уменьшаем фото, если превосходит 640 по ширине, т.к. input RetinaFace 640   
+
+    if img.shape[1] > FIXED_WIDTH:
+        img_bin = Image.fromarray(img)
+        wpercent = (FIXED_WIDTH/float(img.shape[1]))
+        hsize = int((float(img.shape[0])*float(wpercent)))
+        img = img_bin.resize((FIXED_WIDTH,hsize), Image.ANTIALIAS)
+        img = np.array(img)
+        
     # Попадаются черно-белые изображения
     if len(img.shape) < 3:
         img = gray2rgb(img)
