@@ -1,6 +1,5 @@
-from fastapi import FastAPI, File, UploadFile, Form
-from typing import Optional
-from pydantic import BaseModel
+from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 
 import os
 import numpy as np
@@ -26,6 +25,9 @@ face_model = load_model(model_path, compile=False)
 
 from sklearn.preprocessing import normalize
 from abc import abstractmethod, ABC
+
+
+PHOTO_UPLOAD_PATH = os.path.join(os.getcwd(), 'app_front', 'dist', 'static', 'photos')
 
 
 class FaceDetectorBase(ABC):
@@ -187,10 +189,9 @@ class PickleStorage(StorageBase):
         return self
     
     
-    def add(self, profiles, labels):        
+    def add(self, profiles, labels):
         
-        profiles_db = defaultdict(list)
-        profiles_photos = defaultdict(list)
+        profiles = [os.path.basename(p) for p in profiles]
 
         # Дополним метки классов
         if self.__labels_classes:
@@ -206,24 +207,37 @@ class PickleStorage(StorageBase):
         labels = [self.__labels_classes.index(l) for l in labels]
                
         for idx, label in enumerate(labels):
-            profiles_photos[label].append(profiles[idx])
-            profile = {'key': self.__labels_classes[label], 'photos': profiles_photos[label] }
-            profiles_db[label] = profile
+            #profiles_photos[label].append(profiles[idx])
+            
+            do_append_at_id = None
+            for storage_id, s in enumerate(self.__storage):
+                for key, val in s.items():
+                    if key == 'class' and val == label:
+                        do_append_at_id = storage_id
+                    
+            if do_append_at_id is not None:
+                self.__storage[do_append_at_id]['photos'].append(profiles[idx])
+            else:
+                self.__storage.append({'class': label, 'label': self.__labels_classes[label], 'photos': [profiles[idx]] })
       
-        self.__storage.append(profiles_db)
-        
         return labels
     
+    
     def remove(self, label):
-        id = self.__labels_classes.index(label)
-        self.__labels_classes.pop(id)
         
-        for storage in self.__storage:
-            if id in storage:
-                storage.pop(id)
+        try:
+            id = self.__labels_classes.index(label)
+                        
+            for sid, storage in enumerate(self.__storage):
+                if storage['class'] == id:
+                    self.__storage.pop(sid)
+                    
+            return {'msg': f'{label} was deleted from db.'}
+        except ValueError:
+            return {'msg': f'{label} was not found in db.'}
             
                     
-    def get_storage(self):
+    def get_storage(self):               
         return self.__storage
     
     def get_classes(self):
@@ -277,8 +291,7 @@ def get_frs_pipeline(contents, labels=None, keep_photo=False):
     Returns:
         [FRSPipelineBuilder]: [pipeline]
     """
-    db_path = os.path.join(os.getcwd(), 'photodb')   
-    file_path = os.path.join(db_path, str(uuid.uuid4())) + '.jpeg'
+    file_path = os.path.join(PHOTO_UPLOAD_PATH, str(uuid.uuid4())) + '.jpeg'
     
     photo_bin = Image.open(BytesIO(contents))
     photo_bin.save(file_path)
@@ -299,6 +312,27 @@ index_storage.load('db.index')
 
 app = FastAPI(title="DGFR Recognition API", description="Dmitriy Grinev Face Recognition API")
 
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+def enroll_face_task(photo, label):
+    pipeline = get_frs_pipeline(photo, [label])
+    enc_labels = storage.add(pipeline.get_photo_path(), pipeline.get_labels())
+    storage.save('db.pkl')
+    index_storage.add(pipeline.get_embeddings(), enc_labels)
+    index_storage.save()
+        
+    return {"msg": f'{label} enrolled!'}
+    
 
 @app.get("/api/v1/storage/classes", tags=["StorageService"])
 async def get_storage_classes():
@@ -310,25 +344,24 @@ async def enroll_face(photo: UploadFile = File(...), label: str = Form(...)):
     """
         Enroll face to storage
     """
-    pipeline = get_frs_pipeline(await photo.read(), [label])
-    enc_labels = storage.add(pipeline.get_photo_path(), pipeline.get_labels())
-    storage.save('db.pkl')
-    index_storage.add(pipeline.get_embeddings(), enc_labels)
-    index_storage.save()
-        
-    return {"photo": photo.filename, 'label': label}
+    photo_face = await photo.read()
+    result = enroll_face_task(photo_face, label)
+    
+    return result
 
 
 @app.post("/api/v1/storage/list", tags=["StorageService"])
 async def get_storage():
+    current_storage = storage.get_storage()
+   
     return storage.get_storage()
 
 
 @app.post("/api/v1/storage/remove", tags=["StorageService"])
 async def remove_from_storage(label):
-    storage.remove(label)
-    
-    return {'msg': f'{label} was deleted from storage.'}
+    msg = storage.remove(label)
+    storage.save('db.pkl')
+    return msg
 
 
 @app.post("/api/v1/storage/match", tags=["StorageService"])
@@ -339,4 +372,27 @@ async def storage_match(photo: UploadFile = File(...), q_count = 5):
     
     D = 1 / (1 + np.exp(D)) + 0.5 # нормализуем l2 dist в диапазон [0,1]
     
-    return {'distances': D.tolist(), 'indexes': I[0].tolist()}
+    return {'distances': D[0].tolist(), 'indexes': I[0].tolist()}
+
+
+@app.post("/api/v1/storage/decode_match", tags=["StorageService"])
+async def decode_match(distances: list, class_ids: list):
+    detects = []
+    
+    current_storage = storage.get_storage()
+    
+    for id, class_id in enumerate(class_ids):
+        detect = list(filter(lambda person: person['class'] == int(class_id), current_storage))
+        
+        if len(detect) > 0:
+            decoded = {'label': detect[0]['label'], 'photo': detect[0]['photos'], 'conf': int(distances[id])*100}
+            detects.append(decoded)
+     
+    return {'decoded': detects}
+
+
+@app.post("/api/v1/storage/add_task")
+async def add_face_task(background_tasks: BackgroundTasks, photo: UploadFile = File(...), label: str = Form(...)):
+    photo = await photo.read()
+    background_tasks.add_task(enroll_face_task, photo, label)
+    return {"message": "Face enroll task created!"}
