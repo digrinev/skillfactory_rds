@@ -4,7 +4,7 @@
 
 # Использование
 ## Среда для запуска проекта
-Установка поддержи GPU в docker https://www.tensorflow.org/install/docker#gpu_support
+Установка поддержки GPU в docker https://www.tensorflow.org/install/docker#gpu_support
     
     cd docker
     docker build -t tf2gpu .
