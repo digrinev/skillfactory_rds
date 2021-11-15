@@ -2,6 +2,25 @@
 Финальный проект Дмитрия Гринева
 ***
 
+# Описание
+Данная работа охватывает все стадии разработки системы распознавания лиц, а именно:
+- Обучение детектора
+- Обучение экстрактора дескрипторов
+- Выравнивание лица
+- Хранение дескрипторов в базе
+- Поиск дескрипторов в базе
+- Создание бэкэнда и фронтэнда для демонстрации пайплайна
+
+# Данные
+В своей работе я использовал открытые датасеты **WIDER FACE**, **MS CELEB**, **GLINT360K**.
+
+- Для обучения **ArcFace** - https://github.com/deepinsight/insightface/wiki/Dataset-Zoo
+- Для обучения **RetinaFace** - WiderFace 
+
+https://drive.google.com/file/d/14Wy-BUV7BFAe91yddLKpD-DsFpeg2IW0/view?usp=sharing<br> https://drive.google.com/file/d/1sc3lUr_7LppHPEC5FhXiTIxn1HuhZNoo/view?usp=sharing 
+https://drive.google.com/file/d/1YW2_XQ1l30usbKkWCSrmf4oIC9AHRyga/view?usp=sharing
+
+
 # Использование
 ## Среда для запуска проекта
 Установка поддержки GPU в docker https://www.tensorflow.org/install/docker#gpu_support
@@ -32,12 +51,6 @@
   - **Face Detector Based On EfficientDet B0** - код обучения детектора лиц на основе EffDet B0
   - **recognition/ArcFace** - код обучения распознавания лиц
 
-__Датасеты__
-- Для обучения **ArcFace** - https://github.com/deepinsight/insightface/wiki/Dataset-Zoo
-- Для обучения **RetinaFace** - WiderFace 
-
-https://drive.google.com/file/d/14Wy-BUV7BFAe91yddLKpD-DsFpeg2IW0/view?usp=sharing<br> https://drive.google.com/file/d/1sc3lUr_7LppHPEC5FhXiTIxn1HuhZNoo/view?usp=sharing 
-https://drive.google.com/file/d/1YW2_XQ1l30usbKkWCSrmf4oIC9AHRyga/view?usp=sharing
   
 ## Приложение
   - **Запуск готового приложения API + Front**
