@@ -9,7 +9,6 @@ __pycache__/
 # Models
 *.pth
 *.gz
-*.zip
 *.onnx
 *.csv
 *.json
