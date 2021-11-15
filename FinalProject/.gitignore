@@ -12,6 +12,7 @@ __pycache__/
 *.onnx
 *.csv
 *.json
+*.h5
 
 # Distribution / packaging
 .Python

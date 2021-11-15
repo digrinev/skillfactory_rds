@@ -1,22 +1,18 @@
 version: "3.0"
 
 services:
-  face_recognition:
+  face_front:
     build:
-      context: ./docker
-    environment:
-      - DISPLAY=unix$DISPLAY
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
+      context: ./app_front    
     ports:
-      - "8888:8888"
+      - "8080:8080"
     volumes:
-      - ./:/app
-      - /dev/video0:/dev/video0
-      - /tmp/.X11-unix:/tmp/.X11-unix
-    privileged: true
-    runtime: nvidia
+      - ./app_front/static/photos:/app/static/photos
+  
+  face_back:
+    build:
+      context: ./app_back
+    ports:
+      - "8000:8000"
+
     
