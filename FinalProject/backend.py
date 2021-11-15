@@ -2,32 +2,36 @@ from fastapi import FastAPI, File, UploadFile, Form, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 import os
+
+# CPU INFERENCE -- удалить для работы на GPU
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID" 
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import numpy as np
-from tensorflow.python.framework.tensor_conversion_registry import get
 from modules.face import FaceDetector, face_align_by_landmarks, prepare_image, embedding_images
 from skimage.io import imread, imsave
 from skimage.color import gray2rgb, rgba2rgb
 import pickle
 import faiss
-from collections import defaultdict
+
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 import uuid
 from PIL import Image
 from io import BytesIO
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
 
 tf.keras.mixed_precision.set_global_policy("mixed_float16")
 
 face_detector = FaceDetector(model_path='models/Resnet50_Final.pth')
-model_path = os.path.join(os.getcwd(), 'models', 'glint360k_cosface_r100_fp16_0.1.h5')
+model_path = os.path.join(os.getcwd(), 'models', 'resnet100_glint360k.h5')
 face_model = load_model(model_path, compile=False)
 
 from sklearn.preprocessing import normalize
 from abc import abstractmethod, ABC
 
 
-PHOTO_UPLOAD_PATH = os.path.join(os.getcwd(), 'app_front', 'dist', 'static', 'photos')
+PHOTO_UPLOAD_PATH = os.path.join(os.getcwd(), 'app_front', 'static', 'photos')
 
 
 class FaceDetectorBase(ABC):
@@ -351,9 +355,7 @@ async def enroll_face(photo: UploadFile = File(...), label: str = Form(...)):
 
 
 @app.post("/api/v1/storage/list", tags=["StorageService"])
-async def get_storage():
-    current_storage = storage.get_storage()
-   
+async def get_storage():   
     return storage.get_storage()
 
 
