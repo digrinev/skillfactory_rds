@@ -307,6 +307,22 @@ def get_frs_pipeline(contents, labels=None, keep_photo=False):
     pipeline = frs.detect().recognize()
     
     return pipeline
+
+
+# Декодируем предикшены
+def decode_match(distances: list, class_ids: list):
+    detects = []
+    
+    current_storage = storage.get_storage()
+    
+    for id, class_id in enumerate(class_ids):
+        detect = list(filter(lambda person: person['class'] == int(class_id), current_storage))
+        
+        if len(detect) > 0:
+            decoded = {'label': detect[0]['label'], 'photo': detect[0]['photos'], 'conf': float(distances[id])*100}
+            detects.append(decoded)
+     
+    return {'decoded': detects}
     
 
 storage = PickleStorage()
@@ -367,30 +383,17 @@ async def remove_from_storage(label):
 
 
 @app.post("/api/v1/storage/match", tags=["StorageService"])
-async def storage_match(photo: UploadFile = File(...), q_count = 5):
+async def storage_match(photo: UploadFile = File(...), q_count = 5, decode: bool = True):
     index = index_storage.get_index()    
     pipeline = get_frs_pipeline(await photo.read())
     D, I = index.search(pipeline.get_embeddings(), int(q_count))
     
     D = 1 / (1 + np.exp(D)) + 0.5 # нормализуем l2 dist в диапазон [0,1]
     
-    return {'distances': D[0].tolist(), 'indexes': I[0].tolist()}
-
-
-@app.post("/api/v1/storage/decode_match", tags=["StorageService"])
-async def decode_match(distances: list, class_ids: list):
-    detects = []
-    
-    current_storage = storage.get_storage()
-    
-    for id, class_id in enumerate(class_ids):
-        detect = list(filter(lambda person: person['class'] == int(class_id), current_storage))
-        
-        if len(detect) > 0:
-            decoded = {'label': detect[0]['label'], 'photo': detect[0]['photos'], 'conf': int(distances[id])*100}
-            detects.append(decoded)
-     
-    return {'decoded': detects}
+    if decode:
+        return decode_match(D[0].tolist(), I[0].tolist())
+    else:
+        return {'distances': D[0].tolist(), 'indexes': I[0].tolist()}
 
 
 @app.post("/api/v1/storage/add_task")
