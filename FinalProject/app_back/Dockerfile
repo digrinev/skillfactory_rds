@@ -16,4 +16,5 @@ COPY models/ /app/models
 
 COPY ./backend.py /app/backend.py
 
-CMD ["uvicorn", "backend:app"]
+EXPOSE 8000
+CMD ["uvicorn", "backend:app", "--host", "0.0.0.0", "--port", "8000"]

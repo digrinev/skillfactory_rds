@@ -7,12 +7,14 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./app_front/static/photos:/app/static/photos
+      - ./app_front/static/photos:/app/dist/static/photos
   
   face_back:
     build:
       context: ./app_back
     ports:
       - "8000:8000"
+    volumes:
+      - ./app_front/:/app/app_front
 
     
