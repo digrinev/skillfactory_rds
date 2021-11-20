@@ -35,7 +35,13 @@ https://drive.google.com/file/d/1YW2_XQ1l30usbKkWCSrmf4oIC9AHRyga/view?usp=shari
     ```
     
 ## Подготовка проекта
-  - **Скачать предобученные модели** с https://drive.google.com/file/d/1EkF4VoA0XSLZKIDO2zW0QD6MU6sdTs1l/view?usp=sharing и положить в папки models и app_back/models.
+  - **Скачать предобученные модели** с https://drive.google.com/file/d/1683uBYRHA3-iNIhnRwnj3a8N7s85Jp01/view?usp=sharing и положить в папки models и app_back/models.
+  ```
+  keras_resnet100_emore_add5epoch_basic_agedb_30_epoch_3_0.967333.h5 - обученная на MS1V1 ArcFace. Точность на LFW - 99.75%
+  resnet100_glint360k.h5 - обученная на Glint360 CosFace. Точность LFW - 99.85%.
+  Resnet50_Final.pth - Обученная на WiderFace RetinaFace (84.43%
+на HARD).
+  ``` 
   - **Разархивировать** app_front.zip в папку проекта.
   - **Клонировать репозиторий**
   ```sh
